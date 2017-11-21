@@ -2,14 +2,14 @@
   *
   * Components should be in the range 0 to 255 (or 0x00 to 0xFF).
  */
-let color: (~r: int, ~g: int, ~b: int, ~a: int) => Reprocessing_Types.Types.colorT;
+let color: r::int => g::int => b::int => a::int => Reprocessing_Types.Types.colorT;
 
 
 /*** Creates colors for storing in variables of the color datatype.
   *
   * Components should be in the range 0.0 to 1.0.
  */
-let colorf: (~r: float, ~g: float, ~b: float, ~a: float) => Reprocessing_Types.Types.colorT;
+let colorf: r::float => g::float => b::float => a::float => Reprocessing_Types.Types.colorT;
 
 
 /*** Calculates the integer closest to the input. For example,
@@ -29,11 +29,11 @@ let sq: int => int;
   * way of multiplying numbers by themselves (or their reciprocals) in large
   * quantities.
  */
-let pow: (~base: int, ~exp: int) => int;
+let pow: base::int => exp::int => int;
 
 
 /*** Constrains a value to not exceed a maximum and minimum value. */
-let constrain: (~amt: 'a, ~low: 'a, ~high: 'a) => 'a;
+let constrain: amt::'a => low::'a => high::'a => 'a;
 
 
 /*** Re-maps a number from one range to another.
@@ -41,7 +41,7 @@ let constrain: (~amt: 'a, ~low: 'a, ~high: 'a) => 'a;
   * would give 15.
   * Useful for scaling values.
  */
-let remapf: (~value: float, ~low1: float, ~high1: float, ~low2: float, ~high2: float) => float;
+let remapf: value::float => low1::float => high1::float => low2::float => high2::float => float;
 
 
 /*** Re-maps a number from one range to another.
@@ -52,20 +52,20 @@ let remapf: (~value: float, ~low1: float, ~high1: float, ~low2: float, ~high2: f
   * This is the same as `remapf`, but converts all its integer arguments to floats
   * as a convenience.
  */
-let remap: (~value: int, ~low1: int, ~high1: int, ~low2: int, ~high2: int) => int;
+let remap: value::int => low1::int => high1::int => low2::int => high2::int => int;
 
 
 /*** Normalizes a number from another range into a value between 0 and 1.
   * Identical to `remap ::value ::low ::high 0. 1.`
  */
-let norm: (~value: float, ~low: float, ~high: float) => float;
+let norm: value::float => low::float => high::float => float;
 
 
 /*** Generates random numbers. Each time the `randomf` function is called, it
   * returns an unexpected value within the specified range. The top number is
   * not included.
  */
-let randomf: (~min: float, ~max: float) => float;
+let randomf: min::float => max::float => float;
 
 
 /*** Generates random numbers. Each time the `random` function is called, it
@@ -75,7 +75,7 @@ let randomf: (~min: float, ~max: float) => float;
   * This is the same as `randomf`, but converts all its integer arguments to floats
   * as a convenience.
  */
-let random: (~min: int, ~max: int) => int;
+let random: min::int => max::int => int;
 
 
 /*** Sets the seed value for `random` and `randomf`. By default, `random`
@@ -104,7 +104,7 @@ let randomGaussian: unit => float;
   * in between, etc. The lerp function is convenient for creating motion along a
   * straight path and for drawing dotted lines.
  */
-let lerpf: (~low: float, ~high: float, ~value: float) => float;
+let lerpf: low::float => high::float => value::float => float;
 
 
 /*** Calculates a number between two numbers at a specific increment. The
@@ -116,15 +116,17 @@ let lerpf: (~low: float, ~high: float, ~value: float) => float;
   * This is the same as `lerpf`, but converts all its integer arguments to floats
   * as a convenience.
  */
-let lerp: (~low: int, ~high: int, ~value: float) => int;
+let lerp: low::int => high::int => value::float => int;
 
 let lerpColor:
-  (~low: Reprocessing_Types.Types.colorT, ~high: Reprocessing_Types.Types.colorT, ~value: float) =>
+  low::Reprocessing_Types.Types.colorT =>
+  high::Reprocessing_Types.Types.colorT =>
+  value::float =>
   Reprocessing_Types.Types.colorT;
 
 
 /*** Calculates the distance between two points. */
-let distf: (~p1: (float, float), ~p2: (float, float)) => float;
+let distf: p1::(float, float) => p2::(float, float) => float;
 
 
 /*** Calculates the distance between two points.
@@ -132,7 +134,7 @@ let distf: (~p1: (float, float), ~p2: (float, float)) => float;
   * This is the same as `distf`, but converts all its integer arguments to floats
   * as a convenience.
  */
-let dist: (~p1: (int, int), ~p2: (int, int)) => float;
+let dist: p1::(int, int) => p2::(int, int) => float;
 
 
 /*** Calculates the magnitude (or length) of a vector. A vector is a direction
@@ -141,7 +143,7 @@ let dist: (~p1: (int, int), ~p2: (int, int)) => float;
   * distance from the coordinate 0,0 to its x,y value. Therefore, `mag` is a
   * shortcut for writing `dist (0, 0) (x, y)`.
  */
-let magf: ((float, float)) => float;
+let magf: (float, float) => float;
 
 
 /*** Calculates the magnitude (or length) of a vector. A vector is a direction
@@ -153,7 +155,7 @@ let magf: ((float, float)) => float;
   * This is the same as `magf`, but converts all its integer arguments to floats
   * as a convenience.
  */
-let mag: ((int, int)) => float;
+let mag: (int, int) => float;
 
 
 /*** Converts a radian measurement to its corresponding value in degrees.
@@ -197,7 +199,7 @@ let radians: float => float;
   * successive coordinates is important (such as when using noise() within a loop).
   * As a general rule, the smaller the difference between coordinates, the smoother the resulting noise sequence. Steps of 0.005-0.03 work best for most applications, but this will differ depending on use.
  */
-let noise: (float, float, float) => float;
+let noise: float => float => float => float;
 
 
 /*** Sets the seed value for `noise`.  This will also affect the
@@ -211,7 +213,7 @@ let noiseSeed: int => unit;
   * that mark the boundaries between each piece. A list is returned
   * that contains each of the pieces.
  */
-let split: (string, ~sep: char) => list(string);
+let split: string => sep::char => list string;
 
 
 /*** Determines if there is an intersection between a rectangle and a circle.
@@ -221,13 +223,11 @@ let split: (string, ~sep: char) => list(string);
  * Returns true if the two shapes overlap.
  */
 let intersectRectCircle:
-  (
-    ~rectPos: (float, float),
-    ~rectW: float,
-    ~rectH: float,
-    ~circlePos: (float, float),
-    ~circleRad: float
-  ) =>
+  rectPos::(float, float) =>
+  rectW::float =>
+  rectH::float =>
+  circlePos::(float, float) =>
+  circleRad::float =>
   bool;
 
 
@@ -237,12 +237,10 @@ let intersectRectCircle:
  * Returns true if the two shapes overlap.
  */
 let intersectRectRect:
-  (
-    ~rect1Pos: (float, float),
-    ~rect1W: float,
-    ~rect1H: float,
-    ~rect2Pos: (float, float),
-    ~rect2W: float,
-    ~rect2H: float
-  ) =>
+  rect1Pos::(float, float) =>
+  rect1W::float =>
+  rect1H::float =>
+  rect2Pos::(float, float) =>
+  rect2W::float =>
+  rect2H::float =>
   bool;

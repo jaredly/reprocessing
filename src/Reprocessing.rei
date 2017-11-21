@@ -31,16 +31,14 @@ let hotreload: string => bool;
    * is done by returning a different value from the callback.
  */
 let run:
-  (
-    ~setup: glEnvT => 'a,
-    ~draw: ('a, glEnvT) => 'a=?,
-    ~mouseMove: ('a, glEnvT) => 'a=?,
-    ~mouseDragged: ('a, glEnvT) => 'a=?,
-    ~mouseDown: ('a, glEnvT) => 'a=?,
-    ~mouseUp: ('a, glEnvT) => 'a=?,
-    ~keyPressed: ('a, glEnvT) => 'a=?,
-    ~keyReleased: ('a, glEnvT) => 'a=?,
-    ~keyTyped: ('a, glEnvT) => 'a=?,
-    unit
-  ) =>
+  setup::(glEnvT => 'a) =>
+  draw::('a => glEnvT => 'a)? =>
+  mouseMove::('a => glEnvT => 'a)? =>
+  mouseDragged::('a => glEnvT => 'a)? =>
+  mouseDown::('a => glEnvT => 'a)? =>
+  mouseUp::('a => glEnvT => 'a)? =>
+  keyPressed::('a => glEnvT => 'a)? =>
+  keyReleased::('a => glEnvT => 'a)? =>
+  keyTyped::('a => glEnvT => 'a)? =>
+  unit =>
   unit;

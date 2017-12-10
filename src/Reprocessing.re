@@ -26,7 +26,8 @@ type hotreloadT('a) = {
   mutable mouseUp: ('a, Reprocessing_Common.glEnv) => 'a,
   mutable keyPressed: ('a, Reprocessing_Common.glEnv) => 'a,
   mutable keyReleased: ('a, Reprocessing_Common.glEnv) => 'a,
-  mutable keyTyped: ('a, Reprocessing_Common.glEnv) => 'a
+  mutable keyTyped: ('a, Reprocessing_Common.glEnv) => 'a,
+  mutable backPressed: ('a, Reprocessing_Common.glEnv) => option('a)
 };
 
 let hotreloadData = Obj.magic(ref(None));
@@ -71,7 +72,8 @@ let hotreload = (filename) => {
       mouseMove: identity,
       mouseDragged: identity,
       mouseDown: identity,
-      mouseUp: identity
+      mouseUp: identity,
+      backPressed: (_, _) => None,
     });
   Reprocessing_Hotreload.checkRebuild(filename)
 };
@@ -90,6 +92,7 @@ let run =
       ~keyReleased=?,
       ~keyTyped=?,
       ~perfMonitorFont=?,
+      ~backPressed=?,
       ~title=?,
       ()
     ) => {
@@ -106,7 +109,8 @@ let run =
         mouseMove: unwrap(mouseMove),
         mouseDragged: unwrap(mouseDragged),
         mouseDown: unwrap(mouseDown),
-        mouseUp: unwrap(mouseUp)
+        mouseUp: unwrap(mouseUp),
+        backPressed: unwrapOrDefault((_, _) => None, backPressed),
       }
     | Some(hr) =>
       hr.draw = unwrap(draw);
@@ -117,6 +121,7 @@ let run =
       hr.mouseDragged = unwrap(mouseDragged);
       hr.mouseDown = unwrap(mouseDown);
       hr.mouseUp = unwrap(mouseUp);
+      hr.backPressed = unwrapOrDefault((_, _) => None, backPressed);
       print_endline("Succesfully changed functions");
       hr
     };
@@ -267,6 +272,15 @@ let run =
               env.mouse.pressed = true;
               userState := fns.mouseDown(userState^, env)
             },
+          ~backPressed=() => {
+            switch (fns.backPressed(userState^, env)) {
+            | None => false
+            | Some(newState) => {
+              userState := newState;
+              true
+            }
+            }
+          },
           ~mouseUp=
             (~button as _, ~state as _, ~x, ~y) => {
               env.mouse.pos = (x, y);

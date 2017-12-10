@@ -44,5 +44,5 @@ let localizePoint = ((x, y): (int, int), env: glEnv) => {
   (int_of_float(lx), int_of_float(ly))
 };
 
-let loadUserData = (~key: string, _env: glEnv) => Reasongl.Gl.File.loadUserData(~key);
-let saveUserData = (~key: string, ~value: 'a, _env: glEnv) => Reasongl.Gl.File.saveUserData(~key, ~value);
+let loadUserData = (~key: string, env: glEnv) => Reasongl.Gl.File.loadUserData(~context=env.gl, ~key);
+let saveUserData = (~key: string, ~value: 'a, env: glEnv) => Reasongl.Gl.File.saveUserData(~context=env.gl, ~key, ~value);

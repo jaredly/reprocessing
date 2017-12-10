@@ -646,6 +646,7 @@ let drawArcStroke =
 let loadImage = (env: glEnv, filename, isPixel) : imageT => {
   let imageRef = ref(None);
   Gl.loadImage(
+    ~context=env.gl,
     ~filename,
     ~callback=
       (imageData) =>

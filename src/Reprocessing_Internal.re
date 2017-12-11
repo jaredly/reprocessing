@@ -96,14 +96,23 @@ let createCanvas = (window) : glEnv => {
   let uSampler = Gl.getUniformLocation(~context, ~program, ~name="uSampler");
 
   /*** Load a dummy texture. This is because we're using the same shader for things with and without a texture */
-  Gl.texImage2D_RGBA(
+  /* Gl.texImage2D_RGBA(
     ~context,
     ~target=RGLConstants.texture_2d,
     ~level=0,
     ~width=1,
     ~height=1,
     ~border=0,
-    ~data=Gl.Bigarray.of_array(Gl.Bigarray.Uint8, [|0, 0, 0, 0|])
+    ~data=Gl.Bigarray.of_array(Gl.Bigarray.Uint8, [|255, 255, 255, 255|])
+  ); */
+  Gl.fillTextureWithColor(
+    ~context,
+    ~target=RGLConstants.texture_2d,
+    ~level=0,
+    ~red=255,
+    ~green=255,
+    ~blue=255,
+    ~alpha=255
   );
   Gl.texParameteri(
     ~context,
@@ -721,34 +730,34 @@ let drawImage =
   let vertexArray = env.batch.vertexArray;
   set(vertexArray, ii + 0, x1);
   set(vertexArray, ii + 1, y1);
-  set(vertexArray, ii + 2, 0.0);
-  set(vertexArray, ii + 3, 0.0);
-  set(vertexArray, ii + 4, 0.0);
-  set(vertexArray, ii + 5, 0.0);
+  set(vertexArray, ii + 2, 1.0);
+  set(vertexArray, ii + 3, 1.0);
+  set(vertexArray, ii + 4, 1.0);
+  set(vertexArray, ii + 5, 1.0);
   set(vertexArray, ii + 6, fsubx +. fsubw);
   set(vertexArray, ii + 7, fsuby +. fsubh);
   set(vertexArray, ii + 8, x2);
   set(vertexArray, ii + 9, y2);
-  set(vertexArray, ii + 10, 0.0);
-  set(vertexArray, ii + 11, 0.0);
-  set(vertexArray, ii + 12, 0.0);
-  set(vertexArray, ii + 13, 0.0);
+  set(vertexArray, ii + 10, 1.0);
+  set(vertexArray, ii + 11, 1.0);
+  set(vertexArray, ii + 12, 1.0);
+  set(vertexArray, ii + 13, 1.0);
   set(vertexArray, ii + 14, fsubx);
   set(vertexArray, ii + 15, fsuby +. fsubh);
   set(vertexArray, ii + 16, x3);
   set(vertexArray, ii + 17, y3);
-  set(vertexArray, ii + 18, 0.0);
-  set(vertexArray, ii + 19, 0.0);
-  set(vertexArray, ii + 20, 0.0);
-  set(vertexArray, ii + 21, 0.0);
+  set(vertexArray, ii + 18, 1.0);
+  set(vertexArray, ii + 19, 1.0);
+  set(vertexArray, ii + 20, 1.0);
+  set(vertexArray, ii + 21, 1.0);
   set(vertexArray, ii + 22, fsubx +. fsubw);
   set(vertexArray, ii + 23, fsuby);
   set(vertexArray, ii + 24, x4);
   set(vertexArray, ii + 25, y4);
-  set(vertexArray, ii + 26, 0.0);
-  set(vertexArray, ii + 27, 0.0);
-  set(vertexArray, ii + 28, 0.0);
-  set(vertexArray, ii + 29, 0.0);
+  set(vertexArray, ii + 26, 1.0);
+  set(vertexArray, ii + 27, 1.0);
+  set(vertexArray, ii + 28, 1.0);
+  set(vertexArray, ii + 29, 1.0);
   set(vertexArray, ii + 30, fsubx);
   set(vertexArray, ii + 31, fsuby);
   let jj = env.batch.elementPtr;

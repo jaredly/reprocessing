@@ -50,9 +50,9 @@ let getProgram =
 let createCanvas = (window) : glEnv => {
   let (width, height) = (Gl.Window.getWidth(window), Gl.Window.getHeight(window));
   let context = Gl.Window.getContext(window);
-  Gl.viewport(~context, ~x=(-1), ~y=(-1), ~width, ~height);
+  Gl.viewport(~context, ~x=0, ~y=0, ~width, ~height);
   Gl.clearColor(~context, ~r=0., ~g=0., ~b=0., ~a=1.);
-  Gl.clear(~context, ~mask=RGLConstants.color_buffer_bit lor RGLConstants.depth_buffer_bit);
+  /* Gl.clear(~context, ~mask=RGLConstants.color_buffer_bit lor RGLConstants.depth_buffer_bit); */
 
   /*** Camera is a simple record containing one matrix used to project a point in 3D onto the screen. **/
   let camera = {projectionMatrix: Gl.Mat4.create()};
@@ -77,7 +77,7 @@ let createCanvas = (window) : glEnv => {
   let aVertexColor = Gl.getAttribLocation(~context, ~program, ~name="aVertexColor");
   Gl.enableVertexAttribArray(~context, ~attribute=aVertexColor);
   let pMatrixUniform = Gl.getUniformLocation(~context, ~program, ~name="uPMatrix");
-  Gl.uniformMatrix4fv(~context, ~location=pMatrixUniform, ~value=camera.projectionMatrix);
+  /* Gl.uniformMatrix4fv(~context, ~location=pMatrixUniform, ~value=camera.projectionMatrix); */
 
   /*** Get attribute and uniform locations for later usage in the draw code. **/
   let aTextureCoord = Gl.getAttribLocation(~context, ~program, ~name="aTextureCoord");
@@ -145,6 +145,30 @@ let createCanvas = (window) : glEnv => {
     ~near=0.,
     ~far=1.
   );
+
+  /* env.size.width = width;
+  env.size.height = height; */
+  /* let (pixelWidth, pixelHeight) =
+    Gl.Window.(getPixelWidth(window), getPixelHeight(window));
+  Gl.viewport(~context=context, ~x=0, ~y=0, ~width=pixelWidth, ~height=pixelHeight);
+  Gl.clearColor(~context=context, ~r=0., ~g=0., ~b=0., ~a=1.);
+  Gl.Mat4.ortho(
+    ~out=camera.projectionMatrix,
+    ~left=0.,
+    ~right=float_of_int(width),
+    ~bottom=float_of_int(height),
+    ~top=0.,
+    ~near=0.,
+    ~far=1.
+  ); */
+
+  /*** Tell OpenGL about what the uniform called `pMatrixUniform` is, here it's the projectionMatrix. **/
+  Gl.uniformMatrix4fv(
+    ~context=context,
+    ~location=pMatrixUniform,
+    ~value=camera.projectionMatrix
+  );
+
   {
     camera,
     window,

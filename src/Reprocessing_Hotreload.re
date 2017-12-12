@@ -8,5 +8,6 @@ include [%matchenv
   | "native" => Reprocessing_Hotreload_Web
   | "js" => Reprocessing_Hotreload_Web
   | "native-android" => NoHotreloading
+  | "native-ios" => NoHotreloading
   }
 ];

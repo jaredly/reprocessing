@@ -43,6 +43,7 @@ let run:
     ~keyReleased: ('a, glEnvT) => 'a=?,
     ~keyTyped: ('a, glEnvT) => 'a=?,
     ~perfMonitorFont: string=?,
+    ~backPressed: ('a, glEnvT) => option('a)=?,
     ~title: string=?,
     unit
   ) =>

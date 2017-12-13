@@ -404,12 +404,18 @@ let curve = ((xx1, yy1), (xx2, yy2), (xx3, yy3), (xx4, yy4), env: glEnv) =>
 
 let pixelf = (~pos as (x, y), ~color, env: glEnv) => {
   let w = float_of_int(env.style.strokeWeight);
+  let p1=(x +. w, y +. w);
+  let p2=(x, y +. w);
+  let p3=(x +. w, y);
+  let p4=(x, y);
+  let transform = Matrix.matptmul(env.matrix);
+  let (p1, p2, p3, p4) = (transform(p1), transform(p2), transform(p3), transform(p4));
   Internal.addRectToGlobalBatch(
     env,
-    ~bottomRight=(x +. w, y +. w),
-    ~bottomLeft=(x, y +. w),
-    ~topRight=(x +. w, y),
-    ~topLeft=(x, y),
+    ~bottomRight=p1,
+    ~bottomLeft=p2,
+    ~topRight=p3,
+    ~topLeft=p4,
     ~color
   )
 };

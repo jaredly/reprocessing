@@ -151,7 +151,7 @@ let ellipsef = (~center, ~radx, ~rady, env: glEnv) => {
       rady,
       0.,
       Reprocessing_Constants.tau,
-      false,
+      true, /* so we don't get line caps */
       false,
       env.matrix,
       stroke,

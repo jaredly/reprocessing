@@ -50,9 +50,9 @@ let getProgram =
 let createCanvas = (window) : glEnv => {
   let (width, height) = (Gl.Window.getWidth(window), Gl.Window.getHeight(window));
   let context = Gl.Window.getContext(window);
-  Gl.viewport(~context, ~x=0, ~y=0, ~width, ~height);
+  Gl.viewport(~context, ~x=(-1), ~y=(-1), ~width, ~height);
   Gl.clearColor(~context, ~r=0., ~g=0., ~b=0., ~a=1.);
-  /* Gl.clear(~context, ~mask=RGLConstants.color_buffer_bit lor RGLConstants.depth_buffer_bit); */
+  Gl.clear(~context, ~mask=RGLConstants.color_buffer_bit lor RGLConstants.depth_buffer_bit);
 
   /*** Camera is a simple record containing one matrix used to project a point in 3D onto the screen. **/
   let camera = {projectionMatrix: Gl.Mat4.create()};
@@ -77,7 +77,7 @@ let createCanvas = (window) : glEnv => {
   let aVertexColor = Gl.getAttribLocation(~context, ~program, ~name="aVertexColor");
   Gl.enableVertexAttribArray(~context, ~attribute=aVertexColor);
   let pMatrixUniform = Gl.getUniformLocation(~context, ~program, ~name="uPMatrix");
-  /* Gl.uniformMatrix4fv(~context, ~location=pMatrixUniform, ~value=camera.projectionMatrix); */
+  Gl.uniformMatrix4fv(~context, ~location=pMatrixUniform, ~value=camera.projectionMatrix);
 
   /*** Get attribute and uniform locations for later usage in the draw code. **/
   let aTextureCoord = Gl.getAttribLocation(~context, ~program, ~name="aTextureCoord");
@@ -146,29 +146,11 @@ let createCanvas = (window) : glEnv => {
     ~far=1.
   );
 
-  /* env.size.width = width;
-  env.size.height = height; */
-  /* let (pixelWidth, pixelHeight) =
-    Gl.Window.(getPixelWidth(window), getPixelHeight(window));
-  Gl.viewport(~context=context, ~x=0, ~y=0, ~width=pixelWidth, ~height=pixelHeight);
-  Gl.clearColor(~context=context, ~r=0., ~g=0., ~b=0., ~a=1.);
-  Gl.Mat4.ortho(
-    ~out=camera.projectionMatrix,
-    ~left=0.,
-    ~right=float_of_int(width),
-    ~bottom=float_of_int(height),
-    ~top=0.,
-    ~near=0.,
-    ~far=1.
-  ); */
-
-  /*** Tell OpenGL about what the uniform called `pMatrixUniform` is, here it's the projectionMatrix. **/
   Gl.uniformMatrix4fv(
-    ~context=context,
-    ~location=pMatrixUniform,
-    ~value=camera.projectionMatrix
-  );
-
+        ~context=context,
+        ~location=pMatrixUniform,
+        ~value=camera.projectionMatrix
+      );
   {
     camera,
     window,
@@ -192,7 +174,7 @@ let createCanvas = (window) : glEnv => {
       keyCode: Reprocessing_Events.Nothing,
       pressed: Reprocessing_Common.KeySet.empty,
       released: Reprocessing_Common.KeySet.empty,
-      down: Reprocessing_Common.KeySet.empty,
+      down: Reprocessing_Common.KeySet.empty
     },
     mouse: {pos: (0, 0), prevPos: (0, 0), pressed: false},
     style: {
@@ -200,6 +182,7 @@ let createCanvas = (window) : glEnv => {
       strokeWeight: 3,
       strokeCap: Round,
       strokeColor: None,
+      tintColor: None,
       rectMode: Corner
     },
     styleStack: [],
@@ -448,7 +431,9 @@ let drawTriangle = (env, (x1, y1), (x2, y2), (x3, y3), ~color as {r, g, b, a}) =
   env.batch.elementPtr = j + 3
 };
 
-let drawLine = (~p1 as (xx1, yy1), ~p2 as (xx2, yy2), ~color, ~width, ~project, env) => {
+let drawLineWithMatrix =
+    (~p1 as (xx1, yy1), ~p2 as (xx2, yy2), ~matrix, ~color, ~width, ~project, env) => {
+  let transform = Matrix.matptmul(matrix);
   let dx = xx2 -. xx1;
   let dy = yy2 -. yy1;
   let mag = sqrt(dx *. dx +. dy *. dy);
@@ -466,10 +451,10 @@ let drawLine = (~p1 as (xx1, yy1), ~p2 as (xx2, yy2), ~color, ~width, ~project, 
   let y4 = yy1 -. ything -. projecty;
   addRectToGlobalBatch(
     env,
-    ~bottomRight=(x1, y1),
-    ~bottomLeft=(x2, y2),
-    ~topRight=(x3, y3),
-    ~topLeft=(x4, y4),
+    ~bottomRight=transform((x1, y1)),
+    ~bottomLeft=transform((x2, y2)),
+    ~topRight=transform((x3, y3)),
+    ~topLeft=transform((x4, y4)),
     ~color
   )
 };
@@ -487,8 +472,9 @@ let drawArc =
       {r, g, b, a}
     ) => {
   let transform = Matrix.matptmul(matrix);
-  let noOfFans = int_of_float(radx +. rady) / 4 + 10;
-  maybeFlushBatch(~texture=None, ~vert=8 * noOfFans, ~el=3 * noOfFans, env);
+  let noOfFans = int_of_float(radx +. rady) / 2 + 10;
+  maybeFlushBatch(~texture=None, ~vert=vertexSize * (noOfFans + 3), ~el=3 * noOfFans, env);
+  let (start, stop) = stop < start ? (stop, start) : (start, stop);
   let pi = 4.0 *. atan(1.0);
   let anglePerFan = 2. *. pi /. float_of_int(noOfFans);
   let verticesData = env.batch.vertexArray;
@@ -501,11 +487,11 @@ let drawArc =
     if (isPie) {
       /* Start one earlier and force the first point to be the center */
       int_of_float(start /. anglePerFan)
-      - 2
+      - 3
     } else {
-      int_of_float(start /. anglePerFan) - 1
+      int_of_float(start /. anglePerFan) - 2
     };
-  let stop_i = int_of_float(stop /. anglePerFan) - 1;
+  let stop_i = int_of_float(stop /. anglePerFan) + 1;
   for (i in start_i to stop_i) {
     let (xCoordinate, yCoordinate) =
       transform(
@@ -516,7 +502,7 @@ let drawArc =
             yCenterOfCircle
           )
         } else {
-          let angle = anglePerFan *. float_of_int(i + 1);
+          let angle = max(min(anglePerFan *. float_of_int(i + 1), stop), start);
           (xCenterOfCircle +. cos(angle) *. radx, yCenterOfCircle +. sin(angle) *. rady)
         }
       );
@@ -546,7 +532,7 @@ let drawArc =
       set(elementData, jj + 2, ii / vertexSize)
     }
   };
-  env.batch.vertexPtr = env.batch.vertexPtr + noOfFans * vertexSize;
+  env.batch.vertexPtr = env.batch.vertexPtr + (noOfFans + 3) * vertexSize;
   env.batch.elementPtr = env.batch.elementPtr + (stop_i - start_i - 3) * 3 + 3
 };
 
@@ -570,30 +556,32 @@ let drawArcStroke =
   let transform = Matrix.matptmul(matrix);
   let verticesData = env.batch.vertexArray;
   let elementData = env.batch.elementArray;
-  let noOfFans = int_of_float(radx +. rady) / 4 + 10;
+  let noOfFans = int_of_float(radx +. rady) / 2 + 10;
   let set = Gl.Bigarray.set;
-  maybeFlushBatch(~texture=None, ~vert=16, ~el=6, env);
+  maybeFlushBatch(~texture=None, ~vert=noOfFans * 2 * vertexSize, ~el=noOfFans * 6, env);
+  let (start, stop) = stop < start ? (stop, start) : (start, stop);
   let pi = 4.0 *. atan(1.0);
   let anglePerFan = 2. *. pi /. float_of_int(noOfFans);
   /* I calculated this roughly by doing:
      anglePerFan *. float_of_int (i + 1) == start
      i+1 == start /. anglePerFan
      */
-  let start_i = int_of_float(start /. anglePerFan) - 1;
-  let stop_i = int_of_float(stop /. anglePerFan) - 1;
+  let start_i = int_of_float(start /. anglePerFan) - 2;
+  let stop_i = int_of_float(stop /. anglePerFan);
   let prevEl: ref(option((int, int))) = ref(None);
-  let halfwidth = float_of_int(strokeWidth) /. 2.;
+  let strokeWidth = float_of_int(strokeWidth);
+  let halfStrokeWidth = strokeWidth /. 2.;
   for (i in start_i to stop_i) {
-    let angle = anglePerFan *. float_of_int(i + 1);
+    let angle = max(start, min(anglePerFan *. float_of_int(i + 1), stop));
     let (xCoordinateInner, yCoordinateInner) =
       transform((
-        xCenterOfCircle +. cos(angle) *. (radx -. halfwidth),
-        yCenterOfCircle +. sin(angle) *. (rady -. halfwidth)
+        xCenterOfCircle +. cos(angle) *. (radx -. halfStrokeWidth),
+        yCenterOfCircle +. sin(angle) *. (rady -. halfStrokeWidth)
       ));
     let (xCoordinateOuter, yCoordinateOuter) =
       transform((
-        xCenterOfCircle +. cos(angle) *. (radx +. halfwidth),
-        yCenterOfCircle +. sin(angle) *. (rady +. halfwidth)
+        xCenterOfCircle +. cos(angle) *. (radx +. halfStrokeWidth),
+        yCenterOfCircle +. sin(angle) *. (rady +. halfStrokeWidth)
       ));
     let ii = env.batch.vertexPtr;
     set(verticesData, ii + 0, xCoordinateInner);
@@ -632,47 +620,42 @@ let drawArcStroke =
     }
   };
   if (! isOpen) {
-    let (startX, startY) =
-      transform((xCenterOfCircle +. cos(start) *. radx, yCenterOfCircle +. sin(start) *. rady));
-    let (stopX, stopY) =
-      transform((xCenterOfCircle +. cos(stop) *. radx, yCenterOfCircle +. sin(stop) *. rady));
+    let startPt = (xCenterOfCircle +. cos(start) *. radx, yCenterOfCircle +. sin(start) *. rady);
+    let stopPt = (xCenterOfCircle +. cos(stop) *. radx, yCenterOfCircle +. sin(stop) *. rady);
+    let centerOfCircle = (xCenterOfCircle, yCenterOfCircle);
     if (isPie) {
-      drawLine(
-        ~p1=(startX, startY),
-        ~p2=(xCenterOfCircle, yCenterOfCircle),
+      drawLineWithMatrix(
+        ~p1=startPt,
+        ~p2=centerOfCircle,
+        ~matrix,
         ~color=strokeColor,
-        ~width=halfwidth,
+        ~width=strokeWidth,
         ~project=false,
         env
       );
-      drawLine(
-        ~p1=(stopX, stopY),
-        ~p2=(xCenterOfCircle, yCenterOfCircle),
+      drawLineWithMatrix(
+        ~p1=stopPt,
+        ~p2=centerOfCircle,
+        ~matrix,
         ~color=strokeColor,
-        ~width=halfwidth,
+        ~width=strokeWidth,
         ~project=false,
         env
       );
-      drawEllipse(
-        env,
-        transform((xCenterOfCircle, yCenterOfCircle)),
-        halfwidth,
-        halfwidth,
-        matrix,
-        strokeColor
-      )
+      drawEllipse(env, centerOfCircle, halfStrokeWidth, halfStrokeWidth, matrix, strokeColor)
     } else {
-      drawLine(
-        ~p1=(startX, startY),
-        ~p2=(stopX, stopY),
+      drawLineWithMatrix(
+        ~p1=startPt,
+        ~p2=stopPt,
+        ~matrix,
         ~color=strokeColor,
-        ~width=halfwidth,
+        ~width=strokeWidth,
         ~project=false,
         env
       )
     };
-    drawEllipse(env, (startX, startY), halfwidth, halfwidth, matrix, strokeColor);
-    drawEllipse(env, (stopX, stopY), halfwidth, halfwidth, matrix, strokeColor)
+    drawEllipse(env, startPt, halfStrokeWidth, halfStrokeWidth, matrix, strokeColor);
+    drawEllipse(env, stopPt, halfStrokeWidth, halfStrokeWidth, matrix, strokeColor)
   }
 };
 
@@ -742,6 +725,11 @@ let drawImage =
       ~subh,
       env
     ) => {
+  let {r, g, b, a} =
+    switch env.style.tintColor {
+    | Some(c) => c
+    | None => {r: 1., g: 1., b: 1., a: 1.}
+    };
   maybeFlushBatch(~texture=Some(textureBuffer), ~vert=32, ~el=6, env);
   let (fsubx, fsuby, fsubw, fsubh) = (
     float_of_int(subx) /. float_of_int(imgw),
@@ -754,34 +742,34 @@ let drawImage =
   let vertexArray = env.batch.vertexArray;
   set(vertexArray, ii + 0, x1);
   set(vertexArray, ii + 1, y1);
-  set(vertexArray, ii + 2, 1.0);
-  set(vertexArray, ii + 3, 1.0);
-  set(vertexArray, ii + 4, 1.0);
-  set(vertexArray, ii + 5, 1.0);
+  set(vertexArray, ii + 2, r);
+  set(vertexArray, ii + 3, g);
+  set(vertexArray, ii + 4, b);
+  set(vertexArray, ii + 5, a);
   set(vertexArray, ii + 6, fsubx +. fsubw);
   set(vertexArray, ii + 7, fsuby +. fsubh);
   set(vertexArray, ii + 8, x2);
   set(vertexArray, ii + 9, y2);
-  set(vertexArray, ii + 10, 1.0);
-  set(vertexArray, ii + 11, 1.0);
-  set(vertexArray, ii + 12, 1.0);
-  set(vertexArray, ii + 13, 1.0);
+  set(vertexArray, ii + 10, r);
+  set(vertexArray, ii + 11, g);
+  set(vertexArray, ii + 12, b);
+  set(vertexArray, ii + 13, a);
   set(vertexArray, ii + 14, fsubx);
   set(vertexArray, ii + 15, fsuby +. fsubh);
   set(vertexArray, ii + 16, x3);
   set(vertexArray, ii + 17, y3);
-  set(vertexArray, ii + 18, 1.0);
-  set(vertexArray, ii + 19, 1.0);
-  set(vertexArray, ii + 20, 1.0);
-  set(vertexArray, ii + 21, 1.0);
+  set(vertexArray, ii + 18, r);
+  set(vertexArray, ii + 19, g);
+  set(vertexArray, ii + 20, b);
+  set(vertexArray, ii + 21, a);
   set(vertexArray, ii + 22, fsubx +. fsubw);
   set(vertexArray, ii + 23, fsuby);
   set(vertexArray, ii + 24, x4);
   set(vertexArray, ii + 25, y4);
-  set(vertexArray, ii + 26, 1.0);
-  set(vertexArray, ii + 27, 1.0);
-  set(vertexArray, ii + 28, 1.0);
-  set(vertexArray, ii + 29, 1.0);
+  set(vertexArray, ii + 26, r);
+  set(vertexArray, ii + 27, g);
+  set(vertexArray, ii + 28, b);
+  set(vertexArray, ii + 29, a);
   set(vertexArray, ii + 30, fsubx);
   set(vertexArray, ii + 31, fsuby);
   let jj = env.batch.elementPtr;
@@ -803,6 +791,15 @@ let drawImageWithMatrix = (image, ~x, ~y, ~width, ~height, ~subx, ~suby, ~subw, 
   let p2 = transform((float_of_int(x), float_of_int @@ y + height));
   let p3 = transform((float_of_int @@ x + width, float_of_int(y)));
   let p4 = transform((float_of_int(x), float_of_int(y)));
+  drawImage(image, ~p1, ~p2, ~p3, ~p4, ~subx, ~suby, ~subw, ~subh, env)
+};
+
+let drawImageWithMatrixf = (image, ~x, ~y, ~width, ~height, ~subx, ~suby, ~subw, ~subh, env) => {
+  let transform = Matrix.matptmul(env.matrix);
+  let p1 = transform((x +. width, y +. height));
+  let p2 = transform((x, y +. height));
+  let p3 = transform((x +. width, y));
+  let p4 = transform((x, y));
   drawImage(image, ~p1, ~p2, ~p3, ~p4, ~subx, ~suby, ~subw, ~subh, env)
 };
 

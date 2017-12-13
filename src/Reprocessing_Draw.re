@@ -20,6 +20,10 @@ let fill = (color, env: glEnv) => env.style = {...env.style, fillColor: Some(col
 
 let noFill = (env: glEnv) => env.style = {...env.style, fillColor: None};
 
+let tint = (color, env: glEnv) => env.style = {...env.style, tintColor: Some(color)};
+
+let noTint = (env: glEnv) => env.style = {...env.style, tintColor: None};
+
 let stroke = (color, env) => env.style = {...env.style, strokeColor: Some(color)};
 
 let noStroke = (env) => env.style = {...env.style, strokeColor: None};
@@ -74,6 +78,23 @@ let subImage =
     Internal.drawImageWithMatrix(i, ~x, ~y, ~width, ~height, ~subx, ~suby, ~subw, ~subh, env)
   };
 
+let subImagef =
+    (
+      img,
+      ~pos as (x, y),
+      ~width,
+      ~height,
+      ~texPos as (subx, suby),
+      ~texWidth as subw,
+      ~texHeight as subh,
+      env
+    ) =>
+  switch img^ {
+  | None => print_endline("image not ready yet, just doing nothing :D")
+  | Some(i) =>
+    Internal.drawImageWithMatrixf(i, ~x, ~y, ~width, ~height, ~subx, ~suby, ~subw, ~subh, env)
+  };
+
 let image = (img, ~pos as (x, y), ~width=?, ~height=?, env: glEnv) =>
   switch img^ {
   | None => print_endline("image not ready yet, just doing nothing :D")
@@ -102,11 +123,10 @@ let linef = (~p1, ~p2, env: glEnv) =>
   switch env.style.strokeColor {
   | None => () /* don't draw stroke */
   | Some(color) =>
-    let transform = Matrix.matptmul(env.matrix);
     let width = float_of_int(env.style.strokeWeight);
     let radius = width /. 2.;
     let project = env.style.strokeCap == Project;
-    Internal.drawLine(~p1=transform(p1), ~p2=transform(p2), ~color, ~width, ~project, env);
+    Internal.drawLineWithMatrix(~p1, ~p2, ~matrix=env.matrix, ~color, ~width, ~project, env);
     if (env.style.strokeCap == Round) {
       Internal.drawEllipse(env, p1, radius, radius, env.matrix, color);
       Internal.drawEllipse(env, p2, radius, radius, env.matrix, color)
@@ -150,16 +170,16 @@ let ellipse = (~center as (cx, cy), ~radx, ~rady, env: glEnv) =>
 
 let quadf = (~p1, ~p2, ~p3, ~p4, env: glEnv) => {
   let transform = Matrix.matptmul(env.matrix);
-  let (p1, p2, p3, p4) = (transform(p1), transform(p2), transform(p3), transform(p4));
+  /* let (p1, p2, p3, p4) = (transform(p1), transform(p2), transform(p3), transform(p4)); */
   switch env.style.fillColor {
   | None => () /* Don't draw fill */
   | Some(fill) =>
     Internal.addRectToGlobalBatch(
       env,
-      ~topLeft=p1,
-      ~topRight=p2,
-      ~bottomRight=p3,
-      ~bottomLeft=p4,
+      ~topLeft=transform(p1),
+      ~topRight=transform(p2),
+      ~bottomRight=transform(p3),
+      ~bottomLeft=transform(p4),
       ~color=fill
     )
   };
@@ -168,16 +188,17 @@ let quadf = (~p1, ~p2, ~p3, ~p4, env: glEnv) => {
   | Some(color) =>
     let width = float_of_int(env.style.strokeWeight);
     let project = false;
-    Internal.drawLine(~p1, ~p2, ~color, ~width, ~project, env);
-    Internal.drawLine(~p1=p2, ~p2=p3, ~color, ~width, ~project, env);
-    Internal.drawLine(~p1=p3, ~p2=p4, ~color, ~width, ~project, env);
-    Internal.drawLine(~p1, ~p2=p4, ~color, ~width, ~project, env);
+    let matrix = env.matrix;
+    Internal.drawLineWithMatrix(~p1, ~p2, ~matrix, ~color, ~width, ~project, env);
+    Internal.drawLineWithMatrix(~p1=p2, ~p2=p3, ~matrix, ~color, ~width, ~project, env);
+    Internal.drawLineWithMatrix(~p1=p3, ~p2=p4, ~matrix, ~color, ~width, ~project, env);
+    Internal.drawLineWithMatrix(~p1, ~p2=p4, ~matrix, ~color, ~width, ~project, env);
     let r = width /. 2.;
     let m = Matrix.identity;
-    Internal.drawEllipse(env, p1, r, r, m, color);
-    Internal.drawEllipse(env, p2, r, r, m, color);
-    Internal.drawEllipse(env, p3, r, r, m, color);
-    Internal.drawEllipse(env, p4, r, r, m, color)
+    Internal.drawEllipse(env, transform(p1), r, r, m, color);
+    Internal.drawEllipse(env, transform(p2), r, r, m, color);
+    Internal.drawEllipse(env, transform(p3), r, r, m, color);
+    Internal.drawEllipse(env, transform(p4), r, r, m, color)
   }
 };
 
@@ -404,18 +425,12 @@ let curve = ((xx1, yy1), (xx2, yy2), (xx3, yy3), (xx4, yy4), env: glEnv) =>
 
 let pixelf = (~pos as (x, y), ~color, env: glEnv) => {
   let w = float_of_int(env.style.strokeWeight);
-  let p1=(x +. w, y +. w);
-  let p2=(x, y +. w);
-  let p3=(x +. w, y);
-  let p4=(x, y);
-  let transform = Matrix.matptmul(env.matrix);
-  let (p1, p2, p3, p4) = (transform(p1), transform(p2), transform(p3), transform(p4));
   Internal.addRectToGlobalBatch(
     env,
-    ~bottomRight=p1,
-    ~bottomLeft=p2,
-    ~topRight=p3,
-    ~topLeft=p4,
+    ~bottomRight=(x +. w, y +. w),
+    ~bottomLeft=(x, y +. w),
+    ~topRight=(x +. w, y),
+    ~topLeft=(x, y),
     ~color
   )
 };
@@ -425,24 +440,25 @@ let pixel = (~pos as (x, y), ~color, env: glEnv) =>
 
 let trianglef = (~p1, ~p2, ~p3, env: glEnv) => {
   let transform = Matrix.matptmul(env.matrix);
-  let (p1, p2, p3) = (transform(p1), transform(p2), transform(p3));
+  /* let (p1, p2, p3) = (transform(p1), transform(p2), transform(p3)); */
   switch env.style.fillColor {
   | None => () /* don't draw fill */
-  | Some(color) => Internal.drawTriangle(env, p1, p2, p3, ~color)
+  | Some(color) => Internal.drawTriangle(env, transform(p1), transform(p2), transform(p3), ~color)
   };
   switch env.style.strokeColor {
   | None => () /* don't draw stroke */
   | Some(color) =>
     let width = float_of_int(env.style.strokeWeight);
     let project = false;
-    Internal.drawLine(~p1, ~p2, ~color, ~width, ~project, env);
-    Internal.drawLine(~p1=p2, ~p2=p3, ~color, ~width, ~project, env);
-    Internal.drawLine(~p1, ~p2=p3, ~color, ~width, ~project, env);
+    let matrix = env.matrix;
+    Internal.drawLineWithMatrix(~p1, ~p2, ~matrix, ~color, ~width, ~project, env);
+    Internal.drawLineWithMatrix(~p1=p2, ~p2=p3, ~matrix, ~color, ~width, ~project, env);
+    Internal.drawLineWithMatrix(~p1, ~p2=p3, ~matrix, ~color, ~width, ~project, env);
     let r = width /. 2.;
     let m = Matrix.identity;
-    Internal.drawEllipse(env, p1, r, r, m, color);
-    Internal.drawEllipse(env, p2, r, r, m, color);
-    Internal.drawEllipse(env, p3, r, r, m, color)
+    Internal.drawEllipse(env, transform(p1), r, r, m, color);
+    Internal.drawEllipse(env, transform(p2), r, r, m, color);
+    Internal.drawEllipse(env, transform(p3), r, r, m, color)
   }
 };
 

@@ -28,6 +28,7 @@ type styleT = {
   strokeWeight: int,
   strokeCap: strokeCapT,
   fillColor: option(colorT),
+  tintColor: option(colorT),
   rectMode: rectModeT
 };
 
@@ -76,6 +77,14 @@ type _imageT = {
 };
 
 type imageT = ref(option(_imageT));
+
+type soundLoadStatusT =
+  | Loading
+  | ShouldPlay(float, bool)
+  /* | Loaded(Gl.Audio.t) */
+  ;
+
+type soundT = ref(soundLoadStatusT);
 
 type batchT = {
   vertexArray: Gl.Bigarray.t(float, Gl.Bigarray.float32_elt),

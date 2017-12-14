@@ -160,6 +160,10 @@ let ellipsef = (~center, ~radx, ~rady, env: glEnv) => {
   }
 };
 
+let tint = (color, env: glEnv) => env.style = {...env.style, tintColor: Some(color)};
+
+let noTint = (env: glEnv) => env.style = {...env.style, tintColor: None};
+
 let ellipse = (~center as (cx, cy), ~radx, ~rady, env: glEnv) =>
   ellipsef(
     ~center=(float_of_int(cx), float_of_int(cy)),

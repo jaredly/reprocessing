@@ -26,6 +26,7 @@ let frameRate: Reprocessing_Types.Types.glEnvT => int;
 
 let frameCount: Reprocessing_Types.Types.glEnvT => int;
 
+let getTimeMs: Reprocessing_Types.Types.glEnvT => float;
 
 /*** Time in seconds since the last frame */
 let deltaTime: Reprocessing_Types.Types.glEnvT => float;

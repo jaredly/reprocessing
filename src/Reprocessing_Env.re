@@ -33,6 +33,8 @@ let frameRate = (env: glEnv) => env.frame.rate;
 
 let frameCount = (env: glEnv) => env.frame.count;
 
+let getTimeMs = (env: glEnv) => Reasongl.Gl.getTimeMs();
+
 let deltaTime = (env: glEnv) => env.frame.deltaTime;
 
 let localizePointf = (p: (float, float), env: glEnv) =>

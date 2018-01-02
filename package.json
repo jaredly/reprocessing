@@ -1,6 +1,6 @@
 {
-  "name": "Reprocessing",
-  "version": "0.1.0",
+  "name": "@jaredly/reprocessing",
+  "version": "1.0.0",
   "description": "Processing library for Reason",
   "scripts": {
     "build": "bsb -make-world -backend js",
@@ -8,17 +8,19 @@
     "build:native": "bsb -make-world -backend native"
   },
   "dependencies": {
-    "ReasonglInterface": "github:bsansouci/reasongl-interface",
-    "ReasonglNative": "github:bsansouci/reasongl-native",
-    "ReasonglWeb": "github:bsansouci/reasongl-web",
+    "@jaredly/reasongl-interface": "1.0.0",
+    "@jaredly/reasongl-native": "1.0.0",
+    "@jaredly/reasongl-web": "1.0.0",
+    "@jaredly/reasongl-android": "1.0.0",
+    "@jaredly/reasongl-ios": "1.0.0",
     "matchenv": "bsansouci/matchenv"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/schmavery/reprocessing.git"
+    "url": "git+https://github.com/jaredly/reprocessing.git"
   },
-  "homepage": "https://github.com/Schmavery/reprocessing#readme",
-  "bugs": "https://github.com/Schmavery/reprocessing/issues",
+  "homepage": "https://github.com/jaredly/reprocessing#readme",
+  "bugs": "https://github.com/jaredly/reprocessing/issues",
   "keywords": [
     "reason",
     "processing",
@@ -27,8 +29,8 @@
     "webgl"
   ],
   "license": "MIT",
-  "author": "bsansouci & schmavery",
+  "author": "bsansouci & schmavery & jaredly",
   "devDependencies": {
-    "bs-platform": "bsansouci/bsb-native"
+    "bs-platform": "bsansouci/bsb-native#fast"
   }
 }

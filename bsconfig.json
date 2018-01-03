@@ -14,7 +14,7 @@
     "dir": "examples",
     "type": "dev"
   }],
-  "bs-dependencies": ["ReasonglInterface", "ReasonglWeb", "ReasonglNative"],
+  "bs-dependencies": ["@jaredly/reasongl-interface", "@jaredly/reasongl-web", "@jaredly/reasongl-native"],
   "entries": [{
     "backend": "native",
     "main-module": "Index"

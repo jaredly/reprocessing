@@ -158,8 +158,9 @@ let ocamlBase = "node_modules/bs-platform/vendor/ocaml/";
 let sortSourceFilesInDependencyOrder = (sourceFiles, mainFile) => {
   let cmd =
     Printf.sprintf(
-      "%s -pp './node_modules/bs-platform/bin/refmt3.exe --print binary' -ml-synonym .re -I %s -one-line -native %s",
-      ocamlBase ++ "bin/ocamlrun " ++ ocamlBase ++ "bin/ocamldep",
+      "%s -pp './node_modules/bs-platform/lib/refmt3.exe --print binary' -ml-synonym .re -I %s -one-line -native %s",
+      "./node_modules/bs-platform/lib/bsdep.exe",
+      /* ocamlBase ++ "bin/ocamlrun " ++ ocamlBase ++ "bin/ocamldep", */
       Filename.dirname(mainFile),
       String.concat(" ", sourceFiles)
     );

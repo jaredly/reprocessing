@@ -1,4 +1,8 @@
-let vertexShaderSource = {|
+
+let precisionPrefix = Reasongl.Gl.target == "native" ? ""
+  : "precision highp float;";
+
+let vertexShaderSource = precisionPrefix ++ {|
   attribute vec2 aVertexPosition;
   attribute vec4 aVertexColor;
   attribute vec2 aTextureCoord;
@@ -15,13 +19,13 @@ let vertexShaderSource = {|
   }
 |};
 
-let fragmentShaderSource = {|
+let fragmentShaderSource = precisionPrefix ++ {|
   varying vec4 vColor;
   varying vec2 vTextureCoord;
 
   uniform sampler2D uSampler;
 
   void main(void) {
-    gl_FragColor = texture2D(uSampler, vTextureCoord) + vColor;
+    gl_FragColor = texture2D(uSampler, vTextureCoord) * vColor;
   }
 |};

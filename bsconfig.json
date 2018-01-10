@@ -1,0 +1,47 @@
+{
+  "name": "Reprocessing",
+  "ppx-flags": ["matchenv/matchenv"],
+  "sources": [{
+    "dir": "src",
+    "subdirs": [{
+      "dir": "native",
+      "backend": ["bytecode"]
+    }, {
+      "dir": "web",
+      "backend": ["native", "js"]
+    }]
+  }, {
+    "dir": "examples",
+    "type": "dev"
+  }],
+  "bs-dependencies": ["@jaredly/reasongl-interface", "@jaredly/reasongl-web", "@jaredly/reasongl-native"],
+  "entries": [{
+    "backend": "native",
+    "main-module": "Index"
+  }, {
+    "backend": "bytecode",
+    "main-module": "Index"
+  }, {
+    "backend": "js",
+    "main-module": "Index"
+  }, {
+    "backend": "native",
+    "main-module": "Noise"
+  }, {
+    "backend": "bytecode",
+    "main-module": "Noise"
+  }, {
+    "backend": "js",
+    "main-module": "Noise"
+  }, {
+    "backend": "native",
+    "main-module": "Redsquare"
+  }, {
+    "backend": "bytecode",
+    "main-module": "Redsquare"
+  }, {
+    "backend": "js",
+    "main-module": "Redsquare"
+  }],
+  "refmt": 3
+}

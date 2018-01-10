@@ -11,5 +11,6 @@ include [%matchenv
   | "native-android" => NoHotreloading
   | "byte-android" => Reasongl_Hotreload
   | "native-ios" => NoHotreloading
+  | "byte-ios" => Reasongl_Hotreload
   }
 ];

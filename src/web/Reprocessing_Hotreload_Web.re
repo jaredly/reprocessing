@@ -4,19 +4,22 @@ let checkRebuild = (filePath) => {
   if (first^) {
     first := false;
 
-    [%bs.raw{|
-      function() {
+    let startHot: string => unit = [%bs.raw{|
+      function(filePath) {
         console.log ("live life good")
-        var waitAndEval = () => {
-          fetch("/hot.js")
+        var suffix = Math.random().toString(16).slice(2);
+        var waitAndEval = (first) => {
+          fetch((first ? "/hot-first/" : "/hot/") + filePath + "?" + suffix)
             .then(res => res.text())
             .then(code => {
               eval(code);
-              waitAndEval();
+              waitAndEval(false);
             })
         };
-        waitAndEval()
-      }()
-    |}]
-  }
+        waitAndEval(true)
+      }
+    |}];
+    startHot(filePath)
+  };
+  false
 };

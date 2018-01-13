@@ -8,7 +8,7 @@
       "backend": ["bytecode"]
     }, {
       "dir": "web",
-      "backend": ["native", "js"]
+      "backend": ["js"]
     }]
   }, {
     "dir": "examples",

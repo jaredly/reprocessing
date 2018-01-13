@@ -160,10 +160,6 @@ let ellipsef = (~center, ~radx, ~rady, env: glEnv) => {
   }
 };
 
-let tint = (color, env: glEnv) => env.style = {...env.style, tintColor: Some(color)};
-
-let noTint = (env: glEnv) => env.style = {...env.style, tintColor: None};
-
 let ellipse = (~center as (cx, cy), ~radx, ~rady, env: glEnv) =>
   ellipsef(
     ~center=(float_of_int(cx), float_of_int(cy)),
@@ -174,7 +170,6 @@ let ellipse = (~center as (cx, cy), ~radx, ~rady, env: glEnv) =>
 
 let quadf = (~p1, ~p2, ~p3, ~p4, env: glEnv) => {
   let transform = Matrix.matptmul(env.matrix);
-  /* let (p1, p2, p3, p4) = (transform(p1), transform(p2), transform(p3), transform(p4)); */
   switch env.style.fillColor {
   | None => () /* Don't draw fill */
   | Some(fill) =>

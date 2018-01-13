@@ -50,7 +50,7 @@ let getProgram =
 let createCanvas = (window) : glEnv => {
   let (width, height) = (Gl.Window.getWidth(window), Gl.Window.getHeight(window));
   let context = Gl.Window.getContext(window);
-  Gl.viewport(~context, ~x=(-1), ~y=(-1), ~width, ~height);
+  Gl.viewport(~context, ~x=(-1), ~y=(-1), ~width=Gl.Window.getPixelWidth(window), ~height=Gl.Window.getPixelHeight(window));
   Gl.clearColor(~context, ~r=0., ~g=0., ~b=0., ~a=1.);
   Gl.clear(~context, ~mask=RGLConstants.color_buffer_bit lor RGLConstants.depth_buffer_bit);
 
@@ -96,15 +96,6 @@ let createCanvas = (window) : glEnv => {
   let uSampler = Gl.getUniformLocation(~context, ~program, ~name="uSampler");
 
   /*** Load a dummy texture. This is because we're using the same shader for things with and without a texture */
-  /* Gl.texImage2D_RGBA(
-    ~context,
-    ~target=RGLConstants.texture_2d,
-    ~level=0,
-    ~width=1,
-    ~height=1,
-    ~border=0,
-    ~data=Gl.Bigarray.of_array(Gl.Bigarray.Uint8, [|255, 255, 255, 255|])
-  ); */
   Gl.fillTextureWithColor(
     ~context,
     ~target=RGLConstants.texture_2d,

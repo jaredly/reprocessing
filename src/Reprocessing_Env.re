@@ -50,5 +50,28 @@ let localizePoint = ((x, y): (int, int), env: glEnv) => {
   (int_of_float(lx), int_of_float(ly))
 };
 
+let loadSound = (path, env) => {
+  let sound = ref(Loading);
+  Reasongl.Gl.Audio.loadSound(
+    env.window,
+    path,
+    (v) => {
+      switch sound^ {
+      | ShouldPlay(volume, loop) => Reasongl.Gl.Audio.playSound(env.window, v, ~volume, ~loop)
+      | _ => ()
+      };
+      sound := Loaded(v)
+    }
+  );
+  sound
+};
+
+let playSound = (sound, ~volume=1.0, ~loop=false, env) =>
+  switch sound^ {
+  | Loading
+  | ShouldPlay(_, _) => sound := ShouldPlay(volume, loop)
+  | Loaded(sound) => Reasongl.Gl.Audio.playSound(env.window, sound, ~volume, ~loop)
+  };
+
 let loadUserData = (~key: string, env: glEnv) => Reasongl.Gl.File.loadUserData(~context=env.gl, ~key);
 let saveUserData = (~key: string, ~value: 'a, env: glEnv) => Reasongl.Gl.File.saveUserData(~context=env.gl, ~key, ~value);

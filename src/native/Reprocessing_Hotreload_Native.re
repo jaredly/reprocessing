@@ -31,6 +31,7 @@ let readdir = (dir) => {
   loop(Unix.opendir(dir))
 };
 
+let ocaml = Dynlink.is_native ? "ocamlopt.opt" : "ocamlc.opt";
 /**
  * Get the output of a command, in lines.
  */
@@ -157,8 +158,9 @@ let ocamlBase = "node_modules/bs-platform/vendor/ocaml/";
 let sortSourceFilesInDependencyOrder = (sourceFiles, mainFile) => {
   let cmd =
     Printf.sprintf(
-      "%s -pp './node_modules/bs-platform/bin/refmt3.exe --print binary' -ml-synonym .re -I %s -one-line -native %s",
-      ocamlBase ++ "bin/ocamlrun " ++ ocamlBase ++ "bin/ocamldep",
+      "%s -pp './node_modules/bs-platform/lib/refmt3.exe --print binary' -ml-synonym .re -I %s -one-line -native %s",
+      "./node_modules/bs-platform/lib/bsdep.exe",
+      /* ocamlBase ++ "bin/ocamlrun " ++ ocamlBase ++ "bin/ocamldep", */
       Filename.dirname(mainFile),
       String.concat(" ", sourceFiles)
     );
@@ -225,5 +227,50 @@ let checkRebuild = (mainFile) => {
       List.iter((name) => load_plug(compiledPath(name)), filesInOrder);
       true
     }
+  }
+};
+
+/** TODO remove */
+let last_st_mtime = ref(0.);
+
+let ocaml = Dynlink.is_native ? "ocamlopt" : "ocamlc";
+
+let shared = Dynlink.is_native ? "-shared" : "-c";
+
+let ocamlPath = ocamlBase ++ ocaml;
+
+let checkRebuildSingle = (filePath) => {
+  let {Unix.st_mtime} = Unix.stat(filePath);
+  if (st_mtime > last_st_mtime^) {
+    print_endline("Rebuilding hotloaded module");
+    /* @Incomplete Check the error code sent back. Also don't do this, use stdout/stderr. */
+    let cmd =
+      Printf.sprintf(
+        "%s %s -w -40 -I lib/bs/%s/src -I node_modules/ReasonglInterface/lib/bs/%s/src -I node_modules/Reprocessing/lib/bs/%s/src -pp './node_modules/bs-platform/lib/refmt3.exe --print binary' -o lib/bs/%s/%s.%s -impl %s 2>&1",
+        ocamlPath,
+        shared,
+        /* folder */
+        folder,
+        folder,
+        folder,
+        folder,
+        filePath,
+        extension,
+        filePath
+      );
+    /* print_endline cmd; */
+    switch (Unix.system(cmd)) {
+    | WEXITED(0) => ()
+    | WEXITED(_)
+    | WSIGNALED(_)
+    | WSTOPPED(_) => print_endline("Hotreload failed")
+    };
+    /*Unix.system "./node_modules/.bin/bsb";*/
+    load_plug @@ Printf.sprintf("lib/bs/%s/%s.%s", folder, filePath, extension);
+    last_st_mtime := st_mtime;
+    /* print_endline "----------------------"; */
+    true
+  } else {
+    false
   }
 };

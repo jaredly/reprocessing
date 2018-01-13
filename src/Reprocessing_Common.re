@@ -81,8 +81,7 @@ type imageT = ref(option(_imageT));
 type soundLoadStatusT =
   | Loading
   | ShouldPlay(float, bool)
-  /* | Loaded(Gl.Audio.t) */
-  ;
+  | Loaded(Gl.Audio.t);
 
 type soundT = ref(soundLoadStatusT);
 

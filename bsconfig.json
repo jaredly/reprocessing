@@ -1,5 +1,5 @@
 {
-  "name": "Reprocessing",
+  "name": "@jaredly/reprocessing",
   "ppx-flags": ["matchenv/matchenv"],
   "sources": [{
     "dir": "src",
@@ -14,7 +14,7 @@
     "dir": "examples",
     "type": "dev"
   }],
-  "bs-dependencies": ["ReasonglInterface", "ReasonglWeb", "ReasonglNative"],
+  "bs-dependencies": ["@jaredly/reasongl-interface", "@jaredly/reasongl-web", "@jaredly/reasongl-native"],
   "entries": [{
     "backend": "native",
     "main-module": "Index"
@@ -33,6 +33,15 @@
   }, {
     "backend": "js",
     "main-module": "Noise"
+  }, {
+    "backend": "native",
+    "main-module": "Redsquare"
+  }, {
+    "backend": "bytecode",
+    "main-module": "Redsquare"
+  }, {
+    "backend": "js",
+    "main-module": "Redsquare"
   }],
   "refmt": 3
 }

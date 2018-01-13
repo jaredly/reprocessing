@@ -91,7 +91,6 @@ let run =
       ~keyPressed=?,
       ~keyReleased=?,
       ~keyTyped=?,
-      ~perfMonitorFont=?,
       ~backPressed=?,
       ~title=?,
       ()
@@ -135,11 +134,6 @@ let run =
       (window) => {
         let env = Reprocessing_Internal.createCanvas(window);
         let userState = ref(setup(env));
-        let monitorFont =
-          switch perfMonitorFont {
-          | None => None
-          | Some(filename) => Some(Draw.loadFont(~filename, env))
-          };
 
         /*** This is a basically a hack to get around the default behavior of drawing something inside setup.
               Because OpenGL uses double buffering, drawing in setup will result in a flickering shape, as the data
@@ -253,18 +247,8 @@ let run =
               | Some(_) => ignore @@ Reprocessing_Hotreload.checkRebuild(fns.filename)
               | None => ()
               };
-              let beforeDrawTime = Gl.getTimeMs();
               userState := fns.draw(userState^, env);
-              let afterDrawTime = Gl.getTimeMs();
-              let fr = Env.frameRate(env);
-              switch monitorFont {
-              | None => ()
-              | Some(font) =>
-                let body = Printf.sprintf("%d fps : %-0.2fms", fr, afterDrawTime -. beforeDrawTime);
-                let h = Env.width(env);
-                Draw.text(~font, ~body, ~pos=(5, h - 20), env)
-              };
-              afterDraw(f, env);
+              afterDraw(f, env)
             },
           ~mouseDown=
             (~button as _, ~state as _, ~x, ~y) => {
@@ -272,15 +256,6 @@ let run =
               env.mouse.pressed = true;
               userState := fns.mouseDown(userState^, env)
             },
-          ~backPressed=() => {
-            switch (fns.backPressed(userState^, env)) {
-            | None => false
-            | Some(newState) => {
-              userState := newState;
-              true
-            }
-            }
-          },
           ~mouseUp=
             (~button as _, ~state as _, ~x, ~y) => {
               env.mouse.pos = (x, y);
@@ -296,6 +271,15 @@ let run =
                 userState := fns.mouseMove(userState^, env)
               }
             },
+          ~backPressed=() => {
+            switch (fns.backPressed(userState^, env)) {
+            | None => false
+            | Some(newState) => {
+              userState := newState;
+              true
+            }
+            }
+          },
           ~windowResize=
             () =>
               if (env.size.resizeable) {

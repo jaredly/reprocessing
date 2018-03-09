@@ -270,18 +270,21 @@ let run =
             List.iter(((id, x, y)) => {
               Hashtbl.replace(env.mouse.touches, id, (x, y))
             }, touches);
+            userState := fns.touchMove(userState^, env)
           },
           ~touchStart=(~touches) => {
             env.mouse.changedTouches = touches;
             List.iter(((id, x, y)) => {
               Hashtbl.replace(env.mouse.touches, id, (x, y))
             }, touches);
+            userState := fns.touchStart(userState^, env)
           },
           ~touchEnd=(~touches) => {
             env.mouse.changedTouches = touches;
             List.iter(((id, x, y)) => {
               Hashtbl.remove(env.mouse.touches, id);
             }, touches);
+            userState := fns.touchEnd(userState^, env)
           },
           ~mouseDown=
             (~button as _, ~state as _, ~x, ~y) => {

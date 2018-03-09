@@ -1,3 +1,5 @@
+let isTouchScreen: Reprocessing_Types.Types.glEnvT => bool;
+
 let width: Reprocessing_Types.Types.glEnvT => int;
 
 let height: Reprocessing_Types.Types.glEnvT => int;
@@ -5,6 +7,10 @@ let height: Reprocessing_Types.Types.glEnvT => int;
 let maxWidth: Reprocessing_Types.Types.glEnvT => int;
 
 let maxHeight: Reprocessing_Types.Types.glEnvT => int;
+
+let touches: Reprocessing_Types.Types.glEnvT => Hashtbl.t(float, (float, float));
+
+let changedTouches: Reprocessing_Types.Types.glEnvT => list((float, float, float));
 
 let mouse: Reprocessing_Types.Types.glEnvT => (int, int);
 

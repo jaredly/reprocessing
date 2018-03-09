@@ -2,6 +2,8 @@ open Reprocessing_Common;
 
 module Matrix = Reprocessing_Matrix;
 
+let isTouchScreen = (env) => Reasongl.Gl.isTouchScreen;
+
 let width = (env) => env.size.width;
 
 let height = (env) => env.size.height;
@@ -9,6 +11,10 @@ let height = (env) => env.size.height;
 let maxWidth = (env) => Reasongl.Gl.Window.getMaxWidth(env.window);
 
 let maxHeight = (env) => Reasongl.Gl.Window.getMaxHeight(env.window);
+
+let touches = (env) => env.mouse.touches;
+
+let changedTouches = (env) => env.mouse.changedTouches;
 
 let mouse = (env) => env.mouse.pos;
 

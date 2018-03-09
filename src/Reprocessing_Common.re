@@ -35,7 +35,9 @@ type styleT = {
 type mouseT = {
   mutable pos: (int, int),
   mutable prevPos: (int, int),
-  mutable pressed: bool
+  mutable pressed: bool,
+  mutable changedTouches: list((float, float, float)),
+  mutable touches: Hashtbl.t(float, (float, float))
 };
 
 module KeySet =

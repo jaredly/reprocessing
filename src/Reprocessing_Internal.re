@@ -167,7 +167,7 @@ let createCanvas = (window) : glEnv => {
       released: Reprocessing_Common.KeySet.empty,
       down: Reprocessing_Common.KeySet.empty
     },
-    mouse: {pos: (0, 0), prevPos: (0, 0), pressed: false},
+    mouse: {pos: (0, 0), prevPos: (0, 0), pressed: false, changedTouches: [], touches: Hashtbl.create(5)},
     style: {
       fillColor: Some({r: 0., g: 0., b: 0., a: 1.}),
       strokeWeight: 3,

@@ -24,6 +24,9 @@ type hotreloadT('a) = {
   mutable mouseDragged: ('a, Reprocessing_Common.glEnv) => 'a,
   mutable mouseDown: ('a, Reprocessing_Common.glEnv) => 'a,
   mutable mouseUp: ('a, Reprocessing_Common.glEnv) => 'a,
+  mutable touchMove: ('a, Reprocessing_Common.glEnv) => 'a,
+  mutable touchStart: ('a, Reprocessing_Common.glEnv) => 'a,
+  mutable touchEnd: ('a, Reprocessing_Common.glEnv) => 'a,
   mutable keyPressed: ('a, Reprocessing_Common.glEnv) => 'a,
   mutable keyReleased: ('a, Reprocessing_Common.glEnv) => 'a,
   mutable keyTyped: ('a, Reprocessing_Common.glEnv) => 'a,
@@ -72,6 +75,9 @@ let hotreload = (filename) => {
       mouseMove: identity,
       mouseDragged: identity,
       mouseDown: identity,
+      touchMove: identity,
+      touchStart: identity,
+      touchEnd: identity,
       mouseUp: identity,
       backPressed: (_, _) => None,
     });
@@ -88,6 +94,9 @@ let run =
       ~mouseDragged=?,
       ~mouseDown=?,
       ~mouseUp=?,
+      ~touchMove=?,
+      ~touchStart=?,
+      ~touchEnd=?,
       ~keyPressed=?,
       ~keyReleased=?,
       ~keyTyped=?,
@@ -109,6 +118,9 @@ let run =
         mouseDragged: unwrap(mouseDragged),
         mouseDown: unwrap(mouseDown),
         mouseUp: unwrap(mouseUp),
+        touchMove: unwrap(touchMove),
+        touchStart: unwrap(touchStart),
+        touchEnd: unwrap(touchEnd),
         backPressed: unwrapOrDefault((_, _) => None, backPressed),
       }
     | Some(hr) =>
@@ -120,6 +132,9 @@ let run =
       hr.mouseDragged = unwrap(mouseDragged);
       hr.mouseDown = unwrap(mouseDown);
       hr.mouseUp = unwrap(mouseUp);
+      hr.touchMove = unwrap(touchMove);
+      hr.touchStart = unwrap(touchStart);
+      hr.touchEnd = unwrap(touchEnd);
       hr.backPressed = unwrapOrDefault((_, _) => None, backPressed);
       print_endline("Succesfully changed functions");
       hr
@@ -250,6 +265,24 @@ let run =
               userState := fns.draw(userState^, env);
               afterDraw(f, env)
             },
+          ~touchMove=(~touches) => {
+            env.mouse.changedTouches = touches;
+            List.iter(((id, x, y)) => {
+              Hashtbl.replace(env.mouse.touches, id, (x, y))
+            }, touches);
+          },
+          ~touchStart=(~touches) => {
+            env.mouse.changedTouches = touches;
+            List.iter(((id, x, y)) => {
+              Hashtbl.replace(env.mouse.touches, id, (x, y))
+            }, touches);
+          },
+          ~touchEnd=(~touches) => {
+            env.mouse.changedTouches = touches;
+            List.iter(((id, x, y)) => {
+              Hashtbl.remove(env.mouse.touches, id);
+            }, touches);
+          },
           ~mouseDown=
             (~button as _, ~state as _, ~x, ~y) => {
               env.mouse.pos = (x, y);

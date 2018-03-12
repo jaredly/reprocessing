@@ -1,6 +1,6 @@
 {
   "name": "@jaredly/reprocessing",
-  "version": "1.1.5-touch5",
+  "version": "1.1.5-touch6",
   "description": "Processing library for Reason",
   "scripts": {
     "build": "bsb -make-world -backend js",
@@ -11,8 +11,8 @@
     "@jaredly/reasongl-interface": "1.0.1-touch2",
     "@jaredly/reasongl-native": "1.0.3-touch5",
     "@jaredly/reasongl-web": "1.0.2-touch2",
-    "@jaredly/reasongl-android": "1.1.2",
-    "@jaredly/reasongl-ios": "1.1.0",
+    "@jaredly/reasongl-android": "1.1.2-touch",
+    "@jaredly/reasongl-ios": "1.1.0-touch",
     "matchenv": "bsansouci/matchenv"
   },
   "repository": {
